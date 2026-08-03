@@ -20,7 +20,7 @@ using QuadGK, Dierckx, DSP, LsqFit, Distributions, ColorSchemes
     smpl.Height .= [237, 263, 383, 417, 447, 554, 606]
     smpl.Height_sigma .= zeros(nSamples)
     smpl.Age_Sidedness .= zeros(nSamples) # Sidedness (zeros by default: geochron constraints are two-sided). Use -1 for a maximum age and +1 for a minimum age, 0 for two-sided
-    smpl.Path = "/Users/tg5176/Documents/GitHub/MandlaLobe_UPb/MalwaData/MalwaUPbData" # Where are the data files?
+    smpl.Path = joinpath(@__DIR__, "MalwaUPbData") # Where are the data files?
     smpl.inputSigmaLevel = 2; # i.e., are the data files 1-sigma or 2-sigma. Integer.
     smpl.Age_Unit = "Ma"
     smpl.Height_Unit = "m"

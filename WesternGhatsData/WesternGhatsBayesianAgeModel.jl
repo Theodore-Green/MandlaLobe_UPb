@@ -20,7 +20,7 @@ using QuadGK, Dierckx, DSP, LsqFit, Distributions, ColorSchemes
     smpl.Height .= [5, 60, 80, 115, 137, 145, 173, 195, 240, 275, 290, 300, 330, 355, 385, 395, 420, 434, 474, 488, 520, 530, 538, 590]
     smpl.Height_sigma .= zeros(nSamples)
     smpl.Age_Sidedness .= zeros(nSamples) # Sidedness (zeros by default: geochron constraints are two-sided). Use -1 for a maximum age and +1 for a minimum age, 0 for two-sided
-    smpl.Path = "/Users/tg5176/Documents/GitHub/MandlaLobe_UPb/WesternGhatsData/DeccanUPbData" # Where are the data files?
+    smpl.Path = joinpath(@__DIR__, "DeccanUPbData") # Where are the data files?
     smpl.inputSigmaLevel = 2; # i.e., are the data files 1-sigma or 2-sigma. Integer.
     smpl.Age_Unit = "Ma"
     smpl.Height_Unit = "km^3*1000"

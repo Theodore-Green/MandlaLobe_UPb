@@ -68,8 +68,8 @@ using CSV, DataFrames
 
     #U-Pb red bole data with systematic uncertainties (this study)
         #Load sample information with systematic uncertainties
-            BayesianAges_Systematic = DataFrame(CSV.File(joinpath(filelocation, "BayesianModeling/SystematicUncertainties_bootstrapped.csv")));
-            MDA_Systematic = DataFrame(CSV.File(joinpath(filelocation, "BayesianModeling/SystematicUncertainties_MDA.csv")));
+            BayesianAges_Systematic = DataFrame(CSV.File(joinpath(filelocation, "SystematicUncertainties/SystematicUncertainties_bootstrapped.csv")));
+            MDA_Systematic = DataFrame(CSV.File(joinpath(filelocation, "SystematicUncertainties/SystematicUncertainties_MDA.csv")));
 
         #Plotting
             for i = 1:length(BayesianAges_Systematic.Sample)
@@ -79,7 +79,7 @@ using CSV, DataFrames
                     plot!(h2, [BayesianAges_Systematic.Age_Z[i]], [sample_heights[i]], xerror=([BayesianAges_Systematic.Age_Z_95minus[i]], [BayesianAges_Systematic.Age_Z_95plus[i]]), seriestype=:scatter, color=colors[i], markerstrokecolor=colors[i], label="")
                     annotate!(h2, [BayesianAges_Systematic.Age_Z[i]], [sample_heights[i]], text.(["$sample_name"], 9, :top))
                 else
-                    plot!(h2, [MDA_Systematic.Age_Z[i]], [sample_heights[i]], xerror=([MDA_Systematic.Age_Z_plus[i]], [MDA_Systematic.Age_Z_minus[i]]), seriestype=:scatter, color=colors[i], markerstrokecolor=colors[i], label="")
+                    plot!(h2, [MDA_Systematic.Age_Z[i]], [sample_heights[i]], xerror=([MDA_Systematic.Age_Z_2sigma_uncert[i]], [MDA_Systematic.Age_Z_2sigma_uncert[i]]), seriestype=:scatter, color=colors[i], markerstrokecolor=colors[i], label="")
                     annotate!(h2, [MDA_Systematic.Age_Z[i]], [sample_heights[i]], text.(["$sample_name"], 9, :top))
                 end
             end
@@ -109,5 +109,13 @@ using CSV, DataFrames
             display(h2)
             savefig(h2, "Height_Age_plot_eastern_redboles_with_ArArdata.pdf")
             savefig(h2, "Height_Age_plot_eastern_redboles_with_ArArdata.svg")
+
+        #Show also the subset of Ar-Ar unaltered samples and their recalculation from Baksi 2022)
+            #samples_Shrivastava_Baksi = ["MK6", "MK2"]
+            #ages_Shrivastava_Baksi = [65.2, 66.2]
+            #uncert_Shrivastava_Baksi = [1.2, 3.0]
+            #height_Shrivastava_Baksi = [675, 610]
+            #plot!(h2, ages_Shrivastava_Baksi, height_Shrivastava_Baksi, xerror=uncert_Shrivastava_Baksi, seriestype=:scatter, color=:black, markershape=:rect, markerstrokecolor=:black, label="")
+            #savefig(h2, "Height_Age_plot_eastern_redboles_with_ArArdata_Baksiinterpretation.pdf") 
 
 ## --- End of file

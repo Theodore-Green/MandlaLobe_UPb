@@ -19,11 +19,45 @@ using QuadGK, Dierckx, DSP, LsqFit
 
 ## --- Import datasets
     cd(@__DIR__)
-    Mandla_samples_distparameters = DataFrame(CSV.File("MandlaData/UPbData/BayesianModeling/distparameters_bootstrapped.csv"))
-    RBEC = DataFrame(CSV.File("MandlaData/UPbData/RBEC.csv",header=false)); sort!(RBEC, order(:Column1,rev=true));
-    RBFQ = DataFrame(CSV.File("MandlaData/UPbData/RBFQ.csv",header=false)); sort!(RBFQ, order(:Column1,rev=true));
-    WesternGhats_samples_distparameters = DataFrame(CSV.File("WesternGhatsData/DeccanUPbData/distparameters_Schoene2019.csv"))
-    Malwa_samples_distparamters = DataFrame(CSV.File("MalwaData/MalwaUPbData/distparameters_bootstrapped.csv"))
+
+    #Western Ghats and Malwa datasets
+        WesternGhats_samples_distparameters = DataFrame(CSV.File("WesternGhatsData/DeccanUPbData/distparameters_Schoene2019.csv")) #Schoene et al. 2019
+        Malwa_samples_distparamters = DataFrame(CSV.File("MalwaData/MalwaUPbData/distparameters_bootstrapped.csv")) #Eddy et al. 2020
+
+    #Mandla Lobe preferred age interpretation (Bayesian boostrapped eruption ages with entire included distribution) except for RBFQ and RBEC maximum depositonal ages (youngest zircon)
+        interpretation = "bootstrapped"
+        Mandla_samples_distparameters = DataFrame(CSV.File("MandlaData/distparameters_bootstrapped.csv"))
+        RBEC = DataFrame(CSV.File("MandlaData/UPbData/RBEC.csv",header=false)); sort!(RBEC, order(:Column1,rev=true));
+        RBFQ = DataFrame(CSV.File("MandlaData/UPbData/RBFQ.csv",header=false)); sort!(RBFQ, order(:Column1,rev=true));
+
+    #Alternative: Low-n Bayesian bootstrapped eruption ages for Mandla Lobe (except for RBFQ and RBEC maximum depositonal ages (youngest zircon))
+        #interpretation = "bootstrappedyoungest"
+        #Mandla_samples_distparameters = DataFrame(CSV.File("MandlaData/distparameters_bootstrappedyoungest.csv"))
+        #RBEC = DataFrame(CSV.File("MandlaData/UPbData/RBEC.csv",header=false)); sort!(RBEC, order(:Column1,rev=true));
+        #RBFQ = DataFrame(CSV.File("MandlaData/UPbData/RBFQ.csv",header=false)); sort!(RBFQ, order(:Column1,rev=true));
+
+    #Alternative: Weighted mean ages (low-n) for Mandla Lobe (except for RBFQ and RBEC maximum depositonal ages (youngest zircon))
+        #interpretation = "weightedmean"
+        #Mandla_samples_distparameters = DataFrame(CSV.File("MandlaData/WeightedMeanAges.csv"))
+        #RBEC = DataFrame(CSV.File("MandlaData/UPbData/RBEC.csv",header=false)); sort!(RBEC, order(:Column1,rev=true));
+        #RBFQ = DataFrame(CSV.File("MandlaData/UPbData/RBFQ.csv",header=false)); sort!(RBFQ, order(:Column1,rev=true));
+
+    #Alternative: Youngest zircon ages for Mandla Lobe
+        #interpretation = "youngestzircon"
+        #Mandla_samples_distparameters = DataFrame(Sample = [], YoungestZirconAge = [], Uncertainty_2sigma = [])
+        #RBCT = DataFrame(CSV.File("MandlaData/UPbData/RBCT.csv",header=false)); sort!(RBCT, order(:Column1,rev=true)); push!(Mandla_samples_distparameters, ["RBCT", RBCT[end,1], RBCT[end,2]]);
+        #RBCU = DataFrame(CSV.File("MandlaData/UPbData/RBCU.csv",header=false)); sort!(RBCU, order(:Column1,rev=true)); push!(Mandla_samples_distparameters, ["RBCU", RBCU[end,1], RBCU[end,2]]);
+        #RBCV = DataFrame(CSV.File("MandlaData/UPbData/RBCV.csv",header=false)); sort!(RBCV, order(:Column1,rev=true)); push!(Mandla_samples_distparameters, ["RBCV", RBCV[end,1], RBCV[end,2]]);
+        #RBCZ = DataFrame(CSV.File("MandlaData/UPbData/RBCZ.csv",header=false)); sort!(RBCZ, order(:Column1,rev=true)); push!(Mandla_samples_distparameters, ["RBCZ", RBCZ[end,1], RBCZ[end,2]]);
+        #RBCY = DataFrame(CSV.File("MandlaData/UPbData/RBCY.csv",header=false)); sort!(RBCY, order(:Column1,rev=true)); push!(Mandla_samples_distparameters, ["RBCY", RBCY[end,1], RBCY[end,2]]);
+        #RBCW = DataFrame(CSV.File("MandlaData/UPbData/RBCW.csv",header=false)); sort!(RBCW, order(:Column1,rev=true)); push!(Mandla_samples_distparameters, ["RBCW", RBCW[end,1], RBCW[end,2]]);
+        #RBFS = DataFrame(CSV.File("MandlaData/UPbData/RBFS.csv",header=false)); sort!(RBFS, order(:Column1,rev=true)); push!(Mandla_samples_distparameters, ["RBFS", RBFS[end,1], RBFS[end,2]]);
+        #RBFT = DataFrame(CSV.File("MandlaData/UPbData/RBFT.csv",header=false)); sort!(RBFT, order(:Column1,rev=true)); push!(Mandla_samples_distparameters, ["RBFT", RBFT[end,1], RBFT[end,2]]);
+        #RBEC = DataFrame(CSV.File("MandlaData/UPbData/RBEC.csv",header=false)); sort!(RBEC, order(:Column1,rev=true)); push!(Mandla_samples_distparameters, ["RBEC", RBEC[end,1], RBEC[end,2]]);
+        #RBFR = DataFrame(CSV.File("MandlaData/UPbData/RBFR.csv",header=false)); sort!(RBFR, order(:Column1,rev=true)); push!(Mandla_samples_distparameters, ["RBFR", RBFR[end,1], RBFR[end,2]]);
+        #RBEB = DataFrame(CSV.File("MandlaData/UPbData/RBEB.csv",header=false)); sort!(RBEB, order(:Column1,rev=true)); push!(Mandla_samples_distparameters, ["RBEB", RBEB[end,1], RBEB[end,2]]);
+        #RBFQ = DataFrame(CSV.File("MandlaData/UPbData/RBFQ.csv",header=false)); sort!(RBFQ, order(:Column1,rev=true)); push!(Mandla_samples_distparameters, ["RBFQ", RBFQ[end,1], RBFQ[end,2]]);
+        
 
 ## --- Poladpur
     #Data from Schoene et al. 2019, Bayesian MCMC Stratigraphic Age Model results, 95% CI with internal uncertainties
@@ -62,10 +96,6 @@ using QuadGK, Dierckx, DSP, LsqFit
 
     plot!(h1, duration, Mahabaleshwar_eruptionage_distribution, color=:green, label="Mahabaleshwar Eruption Ages")
 
-## --- Mandla Lobe eruption ages for each red bole. Bayesian age model results for all (not stratigraphic age-depth) except RBEC and RBFQ (maximum depositional ages, youngest single zircon)
-    #Mandla Lobe data (this work)
-    Mandla_samples = ["RBCT", "RBCU", "RBCV", "RBCZ", "RBCY", "RBCW", "RBFS", "RBFT", "RBEC", "RBFR", "RBEB", "RBFQ"]
-
 ## --- Probability that Mandla eruptions happen during the Western Ghats hiatuses (area under the curve where the distributions overlap)
     #Poladpur-Ambenali hiatus
         PoladpurAmbenali_hiatus = DataFrame(Sample = [], HiatusFraction = [], HiatusPercent = [], TotalArea = [], SumCalculatedAreas=[])
@@ -80,10 +110,16 @@ using QuadGK, Dierckx, DSP, LsqFit
             elseif sample == "RBFQ"
                 redbole_distribution = normpdf(RBFQ[end,1], RBFQ[end,2], duration)
                 totalarea_redbole = normcdf(RBFQ[end,1], RBFQ[end,2], duration[end]) - normcdf(RBFQ[end,1], RBFQ[end,2], duration[1])
-            else
+            elseif contains("$interpretation", "bootstrapped")
                 redbole_distribution = bilinear_exponential(duration, Mandla_samples_distparameters[i,2:end])
                 dist_parameters = BilinearExponential(Mandla_samples_distparameters[i,2], Mandla_samples_distparameters[i,3], Mandla_samples_distparameters[i,4], Mandla_samples_distparameters[i,5], Mandla_samples_distparameters[i,6])
                 totalarea_redbole = cdf(dist_parameters, duration[end]) - cdf(dist_parameters, duration[1])
+            elseif contains("$interpretation", "weightedmean")
+                redbole_distribution = normpdf(Mandla_samples_distparameters.WeightedMeanAge[i], Mandla_samples_distparameters.Uncertainty_2σ[i], duration)
+                totalarea_redbole = normcdf(Mandla_samples_distparameters.WeightedMeanAge[i], Mandla_samples_distparameters.Uncertainty_2σ[i], duration[end]) - normcdf(Mandla_samples_distparameters.WeightedMeanAge[i], Mandla_samples_distparameters.Uncertainty_2σ[i], duration[1])
+            elseif contains("$interpretation", "youngestzircon")
+                redbole_distribution = normpdf(Mandla_samples_distparameters[i,2], Mandla_samples_distparameters[i,3], duration)
+                totalarea_redbole = normcdf(Mandla_samples_distparameters[i,2], Mandla_samples_distparameters[i,3], duration[end]) - normcdf(Mandla_samples_distparameters[i,2], Mandla_samples_distparameters[i,3], duration[1])
             end
 
             #Distributions of the overlap areas. Minimum values at each point in the overlap area, allows for shading in the overlap area on plots and calculating curves to define that area
@@ -121,7 +157,7 @@ using QuadGK, Dierckx, DSP, LsqFit
             display(h2)
         end
 
-        CSV.write("Hiatus_calculation_PoladpurAmbenali.csv", PoladpurAmbenali_hiatus)
+        CSV.write("MandlaData/Hiatus_calculation_PoladpurAmbenali_$interpretation.csv", PoladpurAmbenali_hiatus)
     
     #Ambenali-Mahabaleshwar hiatus
         AmbenaliMahabaleshwar_hiatus = DataFrame(Sample = [], HiatusFraction = [], HiatusPercent = [], TotalArea = [], SumCalculatedAreas = [])
@@ -136,10 +172,16 @@ using QuadGK, Dierckx, DSP, LsqFit
             elseif sample == "RBFQ"
                 redbole_distribution = normpdf(RBFQ[end,1], RBFQ[end,2], duration)
                 totalarea_redbole = normcdf(RBFQ[end,1], RBFQ[end,2], duration[end]) - normcdf(RBFQ[end,1], RBFQ[end,2], duration[1])
-            else
+            elseif contains("$interpretation", "bootstrapped")
                 redbole_distribution = bilinear_exponential(duration, Mandla_samples_distparameters[i,2:end])
                 dist_parameters = BilinearExponential(Mandla_samples_distparameters[i,2], Mandla_samples_distparameters[i,3], Mandla_samples_distparameters[i,4], Mandla_samples_distparameters[i,5], Mandla_samples_distparameters[i,6])
                 totalarea_redbole = cdf(dist_parameters, duration[end]) - cdf(dist_parameters, duration[1])
+            elseif contains("$interpretation", "weightedmean")
+                redbole_distribution = normpdf(Mandla_samples_distparameters.WeightedMeanAge[i], Mandla_samples_distparameters.Uncertainty_2σ[i], duration)
+                totalarea_redbole = normcdf(Mandla_samples_distparameters.WeightedMeanAge[i], Mandla_samples_distparameters.Uncertainty_2σ[i], duration[end]) - normcdf(Mandla_samples_distparameters.WeightedMeanAge[i], Mandla_samples_distparameters.Uncertainty_2σ[i], duration[1])
+            elseif contains("$interpretation", "youngestzircon")
+                redbole_distribution = normpdf(Mandla_samples_distparameters[i,2], Mandla_samples_distparameters[i,3], duration)
+                totalarea_redbole = normcdf(Mandla_samples_distparameters[i,2], Mandla_samples_distparameters[i,3], duration[end]) - normcdf(Mandla_samples_distparameters[i,2], Mandla_samples_distparameters[i,3], duration[1])
             end
 
             #Distributions of the overlap areas. Minimum values at each point in the overlap area, allows for shading in the overlap area on plots and calculating curves to define that area
@@ -177,6 +219,6 @@ using QuadGK, Dierckx, DSP, LsqFit
             display(h3)
         end
 
-        CSV.write("Hiatus_calculations_AmbenaliMahabaleshwar.csv", AmbenaliMahabaleshwar_hiatus)
+        CSV.write("MandlaData/Hiatus_calculations_AmbenaliMahabaleshwar_$interpretation.csv", AmbenaliMahabaleshwar_hiatus)
 
 ## --- End of file

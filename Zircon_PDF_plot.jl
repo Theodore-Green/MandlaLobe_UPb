@@ -35,7 +35,7 @@
 ## --- Basalt Eruption Ages, Western Ghats, n = 24
     #Data from Schoene et al. 2019, Bayesian MCMC Stratigraphic Age Model results, 95% CI with internal uncertainties
 
-    WesternGhats_samples_distparameters = DataFrame(CSV.File("/Users/tg5176/Documents/GitHub/MandlaLobe_UPb/WesternGhatsData/DeccanUPbData/distparameters_Schoene2019.csv"))
+    WesternGhats_samples_distparameters = DataFrame(CSV.File("WesternGhatsData/DeccanUPbData/distparameters_Schoene2019.csv"))
 
     #Calculate probability density
     WesternGhats_eruptionage_distribution = zeros(length(duration))
@@ -66,13 +66,12 @@
 ## --- Basalt Eruption Ages, Malwa Plateau, n = 7 
     #Data from Eddy et al. 2020, Bayesian MCMC stratigraphic age model outputs for bootstrapped prior, 95% CI with internal uncertainties
 
-    Malwa_samples_distparameters = DataFrame(CSV.File("/Users/tg5176/Documents/GitHub/MandlaLobe_UPb/MalwaData/MalwaUPbData/distparameters_bootstrapped.csv"))
+    Malwa_samples_distparameters = DataFrame(CSV.File("MalwaData/MalwaUPbData/distparameters_bootstrapped.csv"))
 
     #Calculate probability density
     Malwa_eruptionage_distribution = zeros(length(duration))
     for i =1:length(Malwa_samples_distparameters.Sample) 
         Malwa_eruptionage_distribution += bilinear_exponential(duration, Malwa_samples_distparameters[i,2:end]) #Bayesian eruption age distribution parameters (calculates pdf)
-        #Malwa_eruptionage_distribution += normpdf(Malwa_eruptionages[i], Malwa_eruptionages_sigma[i], duration)
     end
     spl_Malwa_eruptionage = Spline1D(duration, Malwa_eruptionage_distribution); Malwa_eruptionage_area, _ = quadgk(x -> spl_Malwa_eruptionage.(x), duration[1], duration[end])
     Malwa_eruptionage_distribution = Malwa_eruptionage_distribution ./ Malwa_eruptionage_area
@@ -151,8 +150,6 @@
             Mandla_eruptionage_distribution += normpdf(RBFQ[end,1], RBFQ[end,2], duration) #Gaussian distribution for this MDA sample age
         else
             Mandla_eruptionage_distribution += bilinear_exponential(duration, Mandla_samples_distparameters[i,2:end]) #Bayesian eruption age distribution parameters (calculates pdf)
-            #Mandla_eruptionage_distribution += normpdf(Mandla_eruptionages[i], Mandla_eruptionages_sigma[i], duration) #Assumes that the eruption ages are Guassian distributions
-    
         end
     end
     spl_Mandla_eruptionage_distribution = Spline1D(duration, Mandla_eruptionage_distribution); Mandla_eruptionage_distribution_area, _ = quadgk(x -> spl_Mandla_eruptionage_distribution.(x), duration[1], duration[end])
@@ -177,6 +174,7 @@
         plot!(h2, duration, WesternGhats_eruptionage_distribution, color=:black, label="Basalt Eruption Ages \nWestern Ghats, n=$n_westernghats_eruptionages", linewidth=1.5)
         plot!(h2, duration, Malwa_eruptionage_distribution, color=:purple, label="Basalt Eruption Ages \nMalwa Plateau, n=$n_Malwa_eruptionages", linewidth=1.5)
         plot!(h2, duration, Mandla_eruptionage_distribution, color=ColorSchemes.YlGnBu[6], label="Basalt Eruption Ages \n Mandla Lobe, n =$n_mandla_eruptionages", linewidth=1.5)
+        
         display(h2)    
         savefig(h2, "Zircon_PDF_EruptionAges.pdf")
 
@@ -194,7 +192,7 @@
     #KPg boundary
         rectangle(w, h, x, y) = Shape(x .+ [0,w,w,0], y .+ [0,0,h,h])
         plot!(h3, rectangle((2*0.050), 10, (66.016-0.050), 0), opacity=0.3, label="", color=:firebrick2, linecolor=:firebrick2)
-        vline!(h3,[66.016], color=:firebrick2, markerstrokecolor=:firebrick2, label="K-Pg boundary", linealpha=1)
+        vline!(h3,[66.016], color=:firebrick2, markerstrokecolor=:firebrick2, label="KPB", linealpha=1)
 
     #Sort Mandla eruption ages into rank order so easier to read figure
         t_Mandla = sortperm(Mandla_eruptionages, rev=true)
@@ -252,37 +250,5 @@
         display(h3)
         savefig(h3, "Pulsedmodel_RankOrder.pdf")
         savefig(h3, "Pulsedmodel_RankOrder.svg")
-
-## --- Alternative plotting of above figure, pulsed eruptions and Mandla Bayesian zircon ages as pdfs (much busier)
-
-    #Plot scaled probability density vs age, like Basu et al. 2021 Figure 5
-        h4 = plot(xlabel="Age (Ma)", ylabel="Normalized probability", xlims=(65.2, 66.8), ylims=(0,15), framestyle=:box, seriestype=:line, legend=:topright, size=(900,600), margin=5mm, xtickfontsize=9, ytickfontsize=9)
-        plot!(h4, duration, combined_malwawesternghats_eruptionage_distribution, color=:black, label="Malwa and Western Ghats \nEruption Ages")
-        plot!(h4, duration, combined_malwawesternghats_eruptionage_distribution, label="", fillrange=zeros(length(duration)), fillalpha=0.6, fillcolor=:black, linealpha=0, ylims=ylims())
-        #plot!(h4, duration, Mandla_eruptionage_distribution, color=ColorSchemes.YlGnBu[6], label="Mandla Lobe Eruption Ages", linewidth=1.5)
-
-   #Plot each Mandla red bole's eruption age as pdf distribution (bootstrapped Bayesian ages (bilinear exponential distribution) for all but the MDA ages of RBFQ and RBEC)
-        for i = 1:length(Mandla_eruptionages)
-            sample_name = Mandla_samples[i]
-            if sample_name == "RBFQ" || sample_name =="RBEC"
-                dist = normpdf(Mandla_eruptionages[i], Mandla_eruptionages_sigma[i], duration)
-                spl_dist = Spline1D(duration, dist); dist_area, _ = quadgk(x -> spl_dist.(x), duration[1], duration[end])
-                dist = normpdf(Mandla_eruptionages[i], Mandla_eruptionages_sigma[i], duration) ./ dist_area #Normalize by area under the curve
-                plot!(h4, duration, dist, color=colors[i], label="$sample_name", linewidth=2)
-            else
-                dist = bilinear_exponential(duration, Mandla_samples_distparameters[i,2:end])
-                spl_dist = Spline1D(duration, dist); dist_area, _ = quadgk(x -> spl_dist.(x), duration[1], duration[end])
-                dist = bilinear_exponential(duration, Mandla_samples_distparameters[i,2:end]) ./ dist_area #Normalize by area under the curve
-                plot!(h4, duration, dist, color=colors[i], label="$sample_name", linewidth=2)
-            end
-        end
-    
-    #KPg boundary (Schoene et al. 2019 recalculation of Clyde et al. 2016 U-Pb date, internal uncertainties only)
-        rectangle(w, h, x, y) = Shape(x .+ [0,w,w,0], y .+ [0,0,h,h])
-        plot!(h4, rectangle((2*0.050), 20, (66.016-0.050), 0), opacity=0.3, label="", color=:firebrick2, linecolor=:firebrick2)
-        vline!(h4,[66.016], color=:firebrick2, markerstrokecolor=:firebrick2, label="K-Pg boundary", linealpha=1)
-       
-    display(h4)
-    savefig(h4, "Pulsedmodel_PDF.pdf")
 
 ## --- End of file

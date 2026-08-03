@@ -1,5 +1,5 @@
 ## --- Load required packages
-using Statistics, StatsBase, DelimitedFiles, SpecialFunctions
+using Statistics, StatsBase, DelimitedFiles, SpecialFunctions, Distributions
 using Chron
 using Plots; gr();
 using ColorSchemes
@@ -13,11 +13,14 @@ using ColorSchemes
     smpl.Height .=  [430, 497, 547, 596, 600, 605, 654, 655, 665, 682, 789, 818]
     smpl.Height_sigma .= [3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0]
     smpl.Age_Sidedness .= zeros(nSamples) # Sidedness (zeros by default: geochron constraints are two-sided). Use -1 for a maximum age and +1 for a minimum age, 0 for two-sided
-    smpl.Path = joinpath(@__DIR__, "MandlaData/UPbData") # Where are the data files?
     smpl.inputSigmaLevel = 2 # i.e., are the data files 1-sigma or 2-sigma. Integer.
     smpl.Age_Unit = "Ma" # Unit of measurement for ages and errors in the data files
     smpl.Height_Unit = "m" # Unit of measurement for Height and Height_sigma
 
+    #Data file location
+        smpl.Path = joinpath(@__DIR__, "MandlaData/UPbData") #Preferred. Use when using the full list of accepted zircon dates from each red bole
+        #smpl.Path = joinpath(@__DIR__, "MandlaData/UPbData_Youngest") #Low-N Bayesian interpretation. Use when just looking at the youngest subset of the zircon dates for each sample. Uncomment line 53 distribution when using.
+    
 # IMPORTANT: smpl.Height must increase with increasing stratigraphic height
 # -- i.e., stratigraphically younger samples must be more positive. For this reason, it is convenient to represent depths below surface as negative numbers.
 
@@ -39,14 +42,15 @@ using ColorSchemes
         savefig(h, joinpath(smpl.Path,"BayesianModeling/BootstrappedDistribution.pdf"))
         display(h)
 
-## --- Estimate the eruption age distributions for each sample  - - - - - - - -
+    ## --- Estimate the eruption age distributions for each sample  - - - - - - - -
 
     # Configure distribution model
         distSteps = 1*10^6 # Number of steps to run in distribution MCMC
         distBurnin = distSteps÷10 # Number to discard
 
     # Choose the form of the prior closure/crystallization distribution to use (uncomment the chosen distribution line)
-        dist = BootstrappedDistribution; dist_name = "bootstrapped"         # Requires running the bootstrapping lines above
+        dist = BootstrappedDistribution; dist_name = "bootstrapped"         # Preferred. Requires running the bootstrapping lines above
+        #dist = BootstrappedDistribution; dist_name = "bootstrappedyoungest" # Use with Low-N youngest interpretation (uncomment line 22) (same prior distribution, dist_name different for file saving purposes) # Requires running the bootstrapping lines above
         #dist = UniformDistribution; dist_name = "uniform"              # A reasonable default
         #dist = MeltsVolcanicZirconDistribution; dist_name = "meltsvolcanic"  # A single magmatic pulse, truncated by eruption
         #dist = ExponentialDistribution; dist_name = "exponential"          # Applicable for survivorship processes, potentially including inheritance/dispersion in Ar-Ar dates
@@ -65,10 +69,10 @@ using ColorSchemes
         distribution_Parameters = vcat(["Sample" "normalizationconstant" "location" "scl" "shp" "skew"], hcat(collect(smpl.Name), smpl.Params[1,:], smpl.Params[2,:],smpl.Params[3,:],smpl.Params[4,:],smpl.Params[5,:]))
         writedlm(joinpath(smpl.Path, "BayesianModeling/distparameters_$dist_name.csv"), distribution_Parameters, ',')
         writedlm(joinpath(@__DIR__, "MandlaData", "distparameters_$dist_name.csv"), distribution_Parameters, ',') #Save in MandlaData folder for later use and comparison to other types of priors
-        
+    
     #Save results in main MandlaData folder for easy later use and comparison between different types of priors
-        cp(joinpath(@__DIR__, "MandlaData/UPbData/BayesianModeling", "distresults_$dist_name.csv"), joinpath(@__DIR__, "MandlaData", "distresults_$dist_name.csv"), force=true)
-        cp(joinpath(@__DIR__, "MandlaData/UPbData/BayesianModeling", "distparameters_$dist_name.csv"), joinpath(@__DIR__, "MandlaData", "distparameters_$dist_name.csv"), force=true)
+        cp(joinpath(smpl.Path, "BayesianModeling", "distresults_$dist_name.csv"), joinpath(@__DIR__, "MandlaData", "distresults_$dist_name.csv"), force=true)
+        cp(joinpath(smpl.Path, "BayesianModeling", "distparameters_$dist_name.csv"), joinpath(@__DIR__, "MandlaData", "distparameters_$dist_name.csv"), force=true)
 
 
 ## --- Add systematic uncertainties for U-Pb data
@@ -83,7 +87,11 @@ using ColorSchemes
     # Compile Bayesian eruption age distributions for each sample into a single matrix for easier calculations
         age_dist_X = Array{Float64}(undef, length(smpl.Name), size(smpl.Age_Distribution[1],1));
         for i = 1:length(smpl.Name)
-            age_dist_X[i,:] = smpl.Age_Distribution[i];
+            if smpl.Name[i] == "RBEC" || smpl.Name[i] == "RBFQ"
+                age_dist_X[i,:] = rand(Normal(smpl.Age[i], smpl.Age_sigma[i]), distSteps); #The single zircon maximum depositonal ages do not have Bayesian eruption age distributions, so use their Normal age distributions as placeholder to avoid error message
+            else
+                age_dist_X[i,:] = smpl.Age_Distribution[i];
+            end
         end
 
     # Convert ages to 206Pb/238U ratios of the distribution
@@ -130,6 +138,7 @@ using ColorSchemes
     #Save tracer and uncertainty distributions
         Uncertainties = vcat(["Sample" "Age_X" "Age_X_95plus" "Age_X_95minus" "Age_Y" "Age_Y_95plus" "Age_Y_95minus" "Age_Z" "Age_Z_95plus" "Age_Z_95minus"], hcat(collect(smpl.Name), collect(age_dist_X_mean), collect(age_dist_X_975p.-age_dist_X_mean), collect(age_dist_X_mean.-age_dist_X_025p), collect(age_dist_XY_mean), collect(age_dist_XY_975p.-age_dist_XY_mean), collect(age_dist_XY_mean.-age_dist_XY_025p), collect(age_dist_XYZ_mean), collect(age_dist_XYZ_975p.-age_dist_XYZ_mean), collect(age_dist_XYZ_mean.-age_dist_XYZ_025p)))
         writedlm(joinpath(smpl.Path, "BayesianModeling/SystematicUncertainties_$dist_name.csv"), Uncertainties, ',')
+        writedlm(joinpath(smpl.Path, "SystematicUncertainties/SystematicUncertainties_$dist_name.csv"), Uncertainties, ',')
 
 ## --- Not running the stratigraphic model for the Mandla Lobe samples because they do not follow stratigraphic superposition. Can uncomment following lines to run it just to see, but does not actually work for Mandla samples
 
@@ -181,49 +190,49 @@ using ColorSchemes
         #unc_lambda238 = 0.107/2/100; # converted from per cent to relative
 
         # Consider only the distribution of ages at model nodes where we have an ash bed
-        #age_dist_X = Array{Float64}(length(smpl.Height),size(agedist,2));
+        #age_dist_X = Array{Float64}(undef, length(smpl.Height),size(agedist,2));
         #for i = 1:length(smpl.Height)
-        #closest_model_node = indmin(abs.(mdl.Height-smpl.Height[i]))
-        #age_dist_X[i,:] = agedist[closest_model_node,:];
+        #closest_model_node = findmin(abs.(mdl.Height.-smpl.Height[i]))
+        #age_dist_X[i,:] = agedist[closest_model_node[2],:];
         #end
 
         # Convert ages to 206Pb/238U ratios of the distribution
-        #ratio_dist = exp.(age_dist_X.*lambda238)-1;
+        #ratio_dist = exp.(age_dist_X.*lambda238).-1;
 
         # Add tracer uncertainty
-        #ratio_dist_tracerunc = Array{Float64}(size(ratio_dist));
+        #ratio_dist_tracerunc = Array{Float64}(undef, size(ratio_dist));
         #for i=1:size(ratio_dist,2)
         #    ratio_dist_tracerunc[:,i] = ratio_dist[:,i].*(1 + unc_tracer*randn());
         #end
 
         # Convert 206/238 ratios back to ages, in Ma
-        #age_dist_XY = log.(ratio_dist_tracerunc+1)./lambda238;
+        #age_dist_XY = log.(ratio_dist_tracerunc.+1)./lambda238;
 
         # Add decay constant uncertainty
-        #age_dist_XYZ = Array{Float64}(size(ratio_dist));
+        #age_dist_XYZ = Array{Float64}(undef,size(ratio_dist));
         #for i=1:size(ratio_dist,2)
-        #    age_dist_XYZ[:,i] = log.(ratio_dist_tracerunc[:,i]+1)./(lambda238.*(1 + unc_lambda238.*randn()));
+        #    age_dist_XYZ[:,i] = log.(ratio_dist_tracerunc[:,i].+1)./(lambda238.*(1 + unc_lambda238.*randn()));
         #end
 
         # Calculate the means and 95% confidence intervals for different levels of systematic uncertainties
 
-        #age_dist_X_mean = mean(age_dist_X,2); # Mean age
-        #age_dist_X_std =  std(age_dist_X,2); # Standard deviation
-        #age_dist_X_median = median(age_dist_X,2); # Median age
-        #age_dist_X_025p = pctile(age_dist_X,2.5,dim=2); # 2.5th percentile
-        #age_dist_X_975p = pctile(age_dist_X,97.5,dim=2); # 97.5th percentile
+        #age_dist_X_mean = nanmean(age_dist_X,dim=2); # Mean age
+        #age_dist_X_std =  nanstd(age_dist_X,dim=2); # Standard deviation
+        #age_dist_X_median = nanmedian(age_dist_X,dim=2); # Median age
+        #age_dist_X_025p = nanpctile(age_dist_X,2.5,dim=2); # 2.5th percentile
+        #age_dist_X_975p = nanpctile(age_dist_X,97.5,dim=2); # 97.5th percentile
 
-        #age_dist_XY_mean = mean(age_dist_XY,2); # Mean age
-        #age_dist_XY_std =  std(age_dist_XY,2); # Standard deviation
-        #age_dist_XY_median = median(age_dist_XY,2); # Median age
-        #age_dist_XY_025p = pctile(age_dist_XY,2.5,dim=2); # 2.5th percentile
-        #age_dist_XY_975p = pctile(age_dist_XY,97.5,dim=2); # 97.5th percentile
+        #age_dist_XY_mean = nanmean(age_dist_XY,dim=2); # Mean age
+        #age_dist_XY_std =  nanstd(age_dist_XY,dim=2); # Standard deviation
+        #age_dist_XY_median = nanmedian(age_dist_XY,dim=2); # Median age
+        #age_dist_XY_025p = nanpctile(age_dist_XY,2.5,dim=2); # 2.5th percentile
+        #age_dist_XY_975p = nanpctile(age_dist_XY,97.5,dim=2); # 97.5th percentile
 
-        #age_dist_XYZ_mean = mean(age_dist_XYZ,2); # Mean age
-        #age_dist_XYZ_std =  std(age_dist_XYZ,2); # Standard deviation
-        #age_dist_XYZ_median = median(age_dist_XYZ,2); # Median age
-        #age_dist_XYZ_025p = pctile(age_dist_XYZ,2.5,dim=2); # 2.5th percentile
-        #age_dist_XYZ_975p = pctile(age_dist_XYZ,97.5,dim=2); # 97.5th percentile
+        #age_dist_XYZ_mean = nanmean(age_dist_XYZ,dim=2); # Mean age
+        #age_dist_XYZ_std =  nanstd(age_dist_XYZ,dim=2); # Standard deviation
+        #age_dist_XYZ_median = nanmedian(age_dist_XYZ,dim=2); # Median age
+        #age_dist_XYZ_025p = nanpctile(age_dist_XYZ,2.5,dim=2); # 2.5th percentile
+        #age_dist_XYZ_975p = nanpctile(age_dist_XYZ,97.5,dim=2); # 97.5th percentile
 
         #age_X_95p = [age_dist_X_mean age_dist_X_975p-age_dist_X_mean age_dist_X_mean-age_dist_X_025p];
         #age_XY_95p = [age_dist_XY_mean age_dist_XY_975p-age_dist_XY_mean age_dist_XY_mean-age_dist_XY_025p];

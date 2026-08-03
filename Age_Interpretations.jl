@@ -8,6 +8,7 @@ using CSV, DataFrames
     cd(@__DIR__)
 
     Bayesian_bootstrapped = DataFrame(CSV.File("MandlaData/distresults_bootstrapped.csv",header=true));
+    Bayesian_bootstrapped_youngest = DataFrame(CSV.File("MandlaData/distresults_bootstrappedyoungest.csv",header=true));
     Bayesian_uniform = DataFrame(CSV.File("MandlaData/distresults_uniform.csv",header=true));
     Bayesian_meltsvolcanic = DataFrame(CSV.File("MandlaData/distresults_meltsvolcanic.csv",header=true));
     Bayesian_triangular = DataFrame(CSV.File("MandlaData/distresults_triangular.csv",header=true));
@@ -20,7 +21,7 @@ using CSV, DataFrames
 ## --- Plotting all Mandla samples
     #Note: RBEC and RBFQ are maximum depositional ages, so plot only youngest zircon interpretation for those
 
-    h1 = plot(ylabel="Age (Ma)", xlabel="", xaxis=false, xticks=false, yflip=true, ygridalpha=0.3, margin=5mm, ytickfontsize=9, size=(1100,500), legend=:topright)
+    h1 = plot(ylabel="Age (Ma)", xlabel="", xaxis=false, xticks=false, yflip=true, ygridalpha=0.3, margin=5mm, ytickfontsize=9, size=(1320,600), legend=:topright)
 
     #KPB
         hline!(h1, [66.016], ribbon=[0.050], label="", color=:firebrick2, markerstrokecolor=:firebrick2, fillalpha=0.3)
@@ -33,13 +34,14 @@ using CSV, DataFrames
             sample_name = Bayesian_bootstrapped.Sample[i]
             if sample_name != "RBFQ" && sample_name != "RBEC" 
                 plot!(h1, [startpoint], [Bayesian_bootstrapped.Age[i]], yerror = ([Bayesian_bootstrapped.Age[i] .- Bayesian_bootstrapped."2.5% CI"[i]], [Bayesian_bootstrapped."97.5% CI"[i] .- Bayesian_bootstrapped.Age[i]]), seriestype=:scatter, color=colors[i], markerstrokecolor=colors[i], label="", markershape=:circle, markersize=4.5, markerstrokewidth=2)
-                plot!(h1, [startpoint+1], [Bayesian_uniform.Age[i]], yerror = ([Bayesian_uniform.Age[i] .- Bayesian_uniform."2.5% CI"[i]], [Bayesian_uniform."97.5% CI"[i] .- Bayesian_uniform.Age[i]]), seriestype=:scatter, color=colors[i], markerstrokecolor=colors[i], label="", markershape=:square, markersize=4.5, markerstrokewidth=2)
-                plot!(h1, [startpoint+2], [Bayesian_meltsvolcanic.Age[i]], yerror = ([Bayesian_meltsvolcanic.Age[i] .- Bayesian_meltsvolcanic."2.5% CI"[i]], [Bayesian_meltsvolcanic."97.5% CI"[i] .- Bayesian_meltsvolcanic.Age[i]]), seriestype=:scatter, color=colors[i], markerstrokecolor=colors[i], label="", markershape=:utriangle, markersize=4.5, markerstrokewidth=2)
-                plot!(h1, [startpoint+3], [Bayesian_triangular.Age[i]], yerror = ([Bayesian_triangular.Age[i] .- Bayesian_triangular."2.5% CI"[i]], [Bayesian_triangular."97.5% CI"[i] .- Bayesian_triangular.Age[i]]), seriestype=:scatter, color=colors[i], markerstrokecolor=colors[i], label="", markershape=:diamond, markersize=4.5, markerstrokewidth=2)
-                plot!(h1, [startpoint+4], [Weighted_mean.WeightedMeanAge[i]], yerror = (Weighted_mean.Uncertainty_2σ[i]), seriestype=:scatter, color=colors[i], markerstrokecolor=colors[i], label="", markershape=:xcross, markersize=4.5, markerstrokewidth=2)
-                plot!(h1, [startpoint+5], [Youngest_zircon.Age[i]], yerror = (Youngest_zircon.Uncertainty_2σ[i]), seriestype=:scatter, color=colors[i], markerstrokecolor=colors[i], label="", markershape=:hline, markersize=4.5, markerstrokewidth=2)
+                plot!(h1, [startpoint+1], [Bayesian_bootstrapped_youngest.Age[i]], yerror = ([Bayesian_bootstrapped_youngest.Age[i] .- Bayesian_bootstrapped_youngest."2.5% CI"[i]], [Bayesian_bootstrapped_youngest."97.5% CI"[i] .- Bayesian_bootstrapped_youngest.Age[i]]), seriestype=:scatter, color=colors[i], markerstrokecolor=colors[i], label="", markershape=:star5, markersize=5.5, markerstrokewidth=2)
+                plot!(h1, [startpoint+2], [Bayesian_uniform.Age[i]], yerror = ([Bayesian_uniform.Age[i] .- Bayesian_uniform."2.5% CI"[i]], [Bayesian_uniform."97.5% CI"[i] .- Bayesian_uniform.Age[i]]), seriestype=:scatter, color=colors[i], markerstrokecolor=colors[i], label="", markershape=:square, markersize=4.5, markerstrokewidth=2)
+                plot!(h1, [startpoint+3], [Bayesian_meltsvolcanic.Age[i]], yerror = ([Bayesian_meltsvolcanic.Age[i] .- Bayesian_meltsvolcanic."2.5% CI"[i]], [Bayesian_meltsvolcanic."97.5% CI"[i] .- Bayesian_meltsvolcanic.Age[i]]), seriestype=:scatter, color=colors[i], markerstrokecolor=colors[i], label="", markershape=:utriangle, markersize=4.5, markerstrokewidth=2)
+                plot!(h1, [startpoint+4], [Bayesian_triangular.Age[i]], yerror = ([Bayesian_triangular.Age[i] .- Bayesian_triangular."2.5% CI"[i]], [Bayesian_triangular."97.5% CI"[i] .- Bayesian_triangular.Age[i]]), seriestype=:scatter, color=colors[i], markerstrokecolor=colors[i], label="", markershape=:diamond, markersize=4.5, markerstrokewidth=2)
+                plot!(h1, [startpoint+5], [Weighted_mean.WeightedMeanAge[i]], yerror = (Weighted_mean.Uncertainty_2σ[i]), seriestype=:scatter, color=colors[i], markerstrokecolor=colors[i], label="", markershape=:xcross, markersize=4.5, markerstrokewidth=2)
+                plot!(h1, [startpoint+6], [Youngest_zircon.Age[i]], yerror = (Youngest_zircon.Uncertainty_2σ[i]), seriestype=:scatter, color=colors[i], markerstrokecolor=colors[i], label="", markershape=:hline, markersize=4.5, markerstrokewidth=2)
                 annotate!(h1, [startpoint], [Bayesian_bootstrapped."97.5% CI"[i]], text.(["$sample_name"], 10, :top, color=colors[i]))
-                startpoint += 7
+                startpoint += 8
             else
                 plot!(h1, [startpoint], [Youngest_zircon.Age[i]], yerror = (Youngest_zircon.Uncertainty_2σ[i]), seriestype=:scatter, color=colors[i], markerstrokecolor=colors[i], label="", markershape=:hline, markersize=4.5, markerstrokewidth=2)
                 annotate!(h1, [startpoint], [Youngest_zircon.Age[i] + Youngest_zircon.Uncertainty_2σ[i]], text.(["$sample_name"], 10, :top, color=colors[i]))
@@ -49,6 +51,7 @@ using CSV, DataFrames
 
     #Legend
         plot!(h1, [NaN], [NaN], label="Bayesian bootstrapped prior", seriestype=:scatter, color=:black, markershape=:circle);
+        plot!(h1, [NaN], [NaN], label="Low-N Bayesian bootstrapped prior", seriestype=:scatter, color=:black, markershape=:star5);
         plot!(h1, [NaN], [NaN], label="Bayesian uniform prior", seriestype=:scatter, color=:black, markershape=:square);
         plot!(h1, [NaN], [NaN], label="Bayesian MELTS prior", seriestype=:scatter, color=:black, markershape=:utriangle);
         plot!(h1, [NaN], [NaN], label="Bayesian triangular prior", seriestype=:scatter, color=:black, markershape=:diamond);
@@ -66,7 +69,7 @@ using CSV, DataFrames
     for i = 1:length(Bayesian_bootstrapped.Sample)
         sample_name = Bayesian_bootstrapped.Sample[i]
         
-        h2 = plot(title="", ylabel="Age (Ma)", xlabel="", xlims=(0.5,6.5), xaxis=false, xticks=false, yflip=true, margin=5mm, ytickfontsize=18, ylabelfontsize=18, background_color = :transparent)
+        h2 = plot(title="", ylabel="Age (Ma)", xlabel="", xlims=(0.5,7.5), xaxis=false, xticks=false, yflip=true, margin=5mm, ytickfontsize=18, ylabelfontsize=18, background_color = :transparent)
 
         #KPB
             #hline!(h2, [66.016], ribbon=[0.050], label="", color=:firebrick2, markerstrokecolor=:firebrick2, fillalpha=0.3)
@@ -77,24 +80,25 @@ using CSV, DataFrames
     
             if sample_name != "RBFQ" && sample_name != "RBEC" 
                 plot!(h2, [startpoint], [Bayesian_bootstrapped.Age[i]], yerror = ([Bayesian_bootstrapped.Age[i] .- Bayesian_bootstrapped."2.5% CI"[i]], [Bayesian_bootstrapped."97.5% CI"[i] .- Bayesian_bootstrapped.Age[i]]), seriestype=:scatter, color=colors[i], markerstrokecolor=colors[i], label="", markershape=:circle, markersize=12)
-                plot!(h2, [startpoint+1], [Bayesian_uniform.Age[i]], yerror = ([Bayesian_uniform.Age[i] .- Bayesian_uniform."2.5% CI"[i]], [Bayesian_uniform."97.5% CI"[i] .- Bayesian_uniform.Age[i]]), seriestype=:scatter, color=colors[i], markerstrokecolor=colors[i], label="", markershape=:square, markersize=12)
-                plot!(h2, [startpoint+2], [Bayesian_meltsvolcanic.Age[i]], yerror = ([Bayesian_meltsvolcanic.Age[i] .- Bayesian_meltsvolcanic."2.5% CI"[i]], [Bayesian_meltsvolcanic."97.5% CI"[i] .- Bayesian_meltsvolcanic.Age[i]]), seriestype=:scatter, color=colors[i], markerstrokecolor=colors[i], label="", markershape=:utriangle, markersize=12)
-                plot!(h2, [startpoint+3], [Bayesian_triangular.Age[i]], yerror = ([Bayesian_triangular.Age[i] .- Bayesian_triangular."2.5% CI"[i]], [Bayesian_triangular."97.5% CI"[i] .- Bayesian_triangular.Age[i]]), seriestype=:scatter, color=colors[i], markerstrokecolor=colors[i], label="", markershape=:diamond, markersize=12)
-                plot!(h2, [startpoint+4], [Weighted_mean.WeightedMeanAge[i]], yerror = (Weighted_mean.Uncertainty_2σ[i]), seriestype=:scatter, color=colors[i], markerstrokecolor=colors[i], label="", markershape=:xcross, markersize=12)
-                plot!(h2, [startpoint+5], [Youngest_zircon.Age[i]], yerror = (Youngest_zircon.Uncertainty_2σ[i]), seriestype=:scatter, color=colors[i], markerstrokecolor=colors[i], label="", markershape=:hline, markersize=12)
-                
+                plot!(h2, [startpoint+1], [Bayesian_bootstrapped_youngest.Age[i]], yerror = ([Bayesian_bootstrapped_youngest.Age[i] .- Bayesian_bootstrapped_youngest."2.5% CI"[i]], [Bayesian_bootstrapped_youngest."97.5% CI"[i] .- Bayesian_bootstrapped_youngest.Age[i]]), seriestype=:scatter, color=colors[i], markerstrokecolor=colors[i], label="", markershape=:star5, markersize=13)
+                plot!(h2, [startpoint+2], [Bayesian_uniform.Age[i]], yerror = ([Bayesian_uniform.Age[i] .- Bayesian_uniform."2.5% CI"[i]], [Bayesian_uniform."97.5% CI"[i] .- Bayesian_uniform.Age[i]]), seriestype=:scatter, color=colors[i], markerstrokecolor=colors[i], label="", markershape=:square, markersize=12)
+                plot!(h2, [startpoint+3], [Bayesian_meltsvolcanic.Age[i]], yerror = ([Bayesian_meltsvolcanic.Age[i] .- Bayesian_meltsvolcanic."2.5% CI"[i]], [Bayesian_meltsvolcanic."97.5% CI"[i] .- Bayesian_meltsvolcanic.Age[i]]), seriestype=:scatter, color=colors[i], markerstrokecolor=colors[i], label="", markershape=:utriangle, markersize=12)
+                plot!(h2, [startpoint+4], [Bayesian_triangular.Age[i]], yerror = ([Bayesian_triangular.Age[i] .- Bayesian_triangular."2.5% CI"[i]], [Bayesian_triangular."97.5% CI"[i] .- Bayesian_triangular.Age[i]]), seriestype=:scatter, color=colors[i], markerstrokecolor=colors[i], label="", markershape=:diamond, markersize=12)
+                plot!(h2, [startpoint+5], [Weighted_mean.WeightedMeanAge[i]], yerror = (Weighted_mean.Uncertainty_2σ[i]), seriestype=:scatter, color=colors[i], markerstrokecolor=colors[i], label="", markershape=:xcross, markersize=12)
+                plot!(h2, [startpoint+6], [Youngest_zircon.Age[i]], yerror = (Youngest_zircon.Uncertainty_2σ[i]), seriestype=:scatter, color=colors[i], markerstrokecolor=colors[i], label="", markershape=:hline, markersize=12)
                 #Legend
-                    plot!(h2, [NaN], [NaN], label="Bayesian bootstrapped prior", seriestype=:scatter, color=:black, markershape=:circle);
-                    plot!(h2, [NaN], [NaN], label="Bayesian uniform prior", seriestype=:scatter, color=:black, markershape=:square);
-                    plot!(h2, [NaN], [NaN], label="Bayesian MELTS prior", seriestype=:scatter, color=:black, markershape=:utriangle);
-                    plot!(h2, [NaN], [NaN], label="Bayesian triangular prior", seriestype=:scatter, color=:black, markershape=:diamond);
-                    plot!(h2, [NaN], [NaN], label="Low-N weighted mean", seriestype=:scatter, color=:black, markershape=:xcross);
-                    plot!(h2, [NaN], [NaN], label="Youngest zircon", seriestype=:scatter, color=:black, markershape=:hline);
+                    #plot!(h2, [NaN], [NaN], label="Bayesian bootstrapped prior", seriestype=:scatter, color=:black, markershape=:circle);
+                    #plot!(h2, [NaN], [NaN], label="Low-N Bayesian bootstrapped prior", seriestype=:scatter, color=:black, markershape=:star5);
+                    #plot!(h2, [NaN], [NaN], label="Bayesian uniform prior", seriestype=:scatter, color=:black, markershape=:square);
+                    #plot!(h2, [NaN], [NaN], label="Bayesian MELTS prior", seriestype=:scatter, color=:black, markershape=:utriangle);
+                    #plot!(h2, [NaN], [NaN], label="Bayesian triangular prior", seriestype=:scatter, color=:black, markershape=:diamond);
+                    #plot!(h2, [NaN], [NaN], label="Low-N weighted mean", seriestype=:scatter, color=:black, markershape=:xcross);
+                    #plot!(h2, [NaN], [NaN], label="Youngest zircon", seriestype=:scatter, color=:black, markershape=:hline);
                     
             else
                 plot!(h2, [startpoint], [Youngest_zircon.Age[i]], yerror = (Youngest_zircon.Uncertainty_2σ[i]), seriestype=:scatter, color=colors[i], markerstrokecolor=colors[i], label="", markershape=:hline, markersize=12)
                 #Legend
-                    plot!(h2, [NaN], [NaN], label="MDA: Youngest zircon", seriestype=:scatter, color=:black, markershape=:hline);
+                    #plot!(h2, [NaN], [NaN], label="MDA: Youngest zircon", seriestype=:scatter, color=:black, markershape=:hline);
             end
         
         #Save and display figure

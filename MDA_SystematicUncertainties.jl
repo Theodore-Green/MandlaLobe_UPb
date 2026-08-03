@@ -28,7 +28,7 @@
         lambda238 = 1.55125e-10 * 1e6
         unc_lambda238 = 0.107/2/100 # converted from per cent to relative
         
-    # Tracer and systematic uncertainites for RBEC and RBFQ youngest zircon MDA ages
+    # Tracer and systematic uncertainites for youngest zircon MDA ages of each sample
         n = 1000000 #Same length as the Bayesian age distributions used for the other dates  
 
         age_dist_X = Array{Float64}(undef, length(SampleData.Name), n); 
@@ -79,7 +79,7 @@
         age_XYZ_2σ = [age_dist_XYZ_mean age_dist_XYZ_std.*2]
 
     #Save tracer and systematic uncertainties
-        Uncertainties = vcat(["Sample" "Age_X" "Age_X_plus" "Age_X_minus" "Age_Y" "Age_Y_plus" "Age_Y_minus" "Age_Z" "Age_Z_plus" "Age_Z_minus"], hcat(collect(SampleData.Name), collect(age_dist_X_mean), collect(age_dist_X_std .* 2), collect(age_dist_X_std .* 2), collect(age_dist_XY_mean), collect(age_dist_XY_std .* 2), collect(age_dist_XY_std .* 2), collect(age_dist_XYZ_mean), collect(age_dist_XYZ_std .* 2), collect(age_dist_XYZ_std .* 2)))
-        writedlm(joinpath(@__DIR__, "MandlaData/UPbData/BayesianModeling/SystematicUncertainties_MDA.csv"), Uncertainties, ',')
+        Uncertainties = vcat(["Sample" "Age_X" "Age_X_2sigma_uncert" "Age_Y" "Age_Y_2sigma_uncert" "Age_Z" "Age_Z_2sigma_uncert"], hcat(collect(SampleData.Name), collect(age_dist_X_mean), collect(age_dist_X_std .* 2), collect(age_dist_XY_mean), collect(age_dist_XY_std .* 2), collect(age_dist_XYZ_mean), collect(age_dist_XYZ_std .* 2)))
+        writedlm(joinpath(@__DIR__, "MandlaData/UPbData/SystematicUncertainties/SystematicUncertainties_MDA.csv"), Uncertainties, ',')
 
 ## --- End of file

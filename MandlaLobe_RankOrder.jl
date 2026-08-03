@@ -29,7 +29,7 @@ using CSV, DataFrames
     colors = ColorSchemes.twelvebitrainbow;
 
 ## --- Set up rank order plot
-    h1 = plot(ylabel="Age (Ma)", xlabel="", legend=false, xaxis=false, xticks=false, yflip=true, ylims=(64.90, 67.60), ygridalpha=0.3, size=(1100,500), margin=5mm, ytickfontsize=9)
+    h1 = plot(ylabel="Age (Ma)", xlabel="", legend=false, xaxis=false, xticks=false, yflip=true, ylims=(64.90, 67.3), ygridalpha=0.3, size=(1100,500), margin=5mm, ytickfontsize=9)
 
 ## --- Magnetic reversals (Ogg 2021, Geomagnetic polarity timescale)
     rectangle(w, h, x, y) = Shape(x .+ [0,w,w,0], y .+ [0,0,h,h]) #Define plotting a rectangle (coordinates of the four vertices. Negative height here because y axis decreases upwards)
@@ -41,8 +41,7 @@ using CSV, DataFrames
     plot!(h1, rectangle(3, -(63.537-62.530), 0, 63.537), opacity=1, color=:white, linecolor=:black, label=""); annotate!(h1, [0], [63.537], text.(["C27R"], 9, :bottom, color=:black)) #C27r
     plot!(h1, rectangle(3, -(62.530-62.278), 0, 62.530), opacity=1, color=:black, linecolor=:black, label=""); annotate!(h1, [0], [62.530], text.(["C27N"], 9, :bottom, color=:gray)) #C27n
 
-    #Starting x point for sample data
-    x2 = 4;
+    x1 = 4;
 
 ## --- Cretaceous-Paleogene boundary (Schoene et al. 2019 recalculation of Clyde et al. 2016 U-Pb date: 66.016±0.050 Ma (0.099Ma for full systematic uncertainty))
     plot!(h1, [0,3], [66.016, 66.016], ribbon=0.050, seriestype=:line, color=:firebrick2, markerstrokecolor=:firebrick2, label="", linealpha=1, fillalpha=0.3, series_annotations=["",text("KPB",9,:bottom, :firebrick2)])
@@ -94,12 +93,12 @@ using CSV, DataFrames
                 number_of_samples += length(ages)
                 
                 if i .== 1
-                    startpoint = x2 + 1
+                    startpoint = x1 + 1
                 else
                     startpoint = 1 + endpoint
                 end
 
-                endpoint = x2 + number_of_samples
+                endpoint = x1 + number_of_samples
                 
                 if sample_name != "RBFQ" && sample_name != "RBEC"
                     plot!(h1, startpoint:endpoint, ages, yerror=uncert, seriestype=:scatter, color=colors[i], markerstrokecolor=colors[i], label="$sample_name")
@@ -123,7 +122,7 @@ using CSV, DataFrames
 
 ## --- Comparison to Ar-Ar data from Shrivastava et al. 2015 (must include the systematic uncertainties)
     #Set up plot
-        h2 = plot(ylabel="Age (Ma)", xlabel="", legend=false, xaxis=false, xticks=false, yflip=true, ygridalpha=0.3, ylims=(62.3, 67.6), size=(1100,500), margin=5mm, ytickfontsize=9)
+        h2 = plot(ylabel="Age (Ma)", xlabel="", legend=false, xaxis=false, xticks=false, yflip=true, ygridalpha=0.3, ylims=(62.3, 67.3), size=(1100,500), margin=5mm, ytickfontsize=9)
 
         #Magnetic reversals (Ogg 2021, Geomagnetic polarity timescale)
             rectangle(w, h, x, y) = Shape(x .+ [0,w,w,0], y .+ [0,0,h,h]) #Define plotting a rectangle (coordinates of the four vertices. Negative height here because y axis decreases upwards)
@@ -143,8 +142,23 @@ using CSV, DataFrames
 
     #U-Pb red bole dates and plotting (with systematic uncertainties)
         #Load systematic uncertainty datasets
-            BayesianAges_Systematic = DataFrame(CSV.File(joinpath(filelocation, "BayesianModeling/SystematicUncertainties_bootstrapped.csv")));
-            MDA_Systematic = DataFrame(CSV.File(joinpath(filelocation, "BayesianModeling/SystematicUncertainties_MDA.csv")));
+            BayesianAges_Systematic = DataFrame(CSV.File(joinpath(filelocation, "SystematicUncertainties/SystematicUncertainties_bootstrapped.csv")));
+            MDA_Systematic = DataFrame(CSV.File(joinpath(filelocation, "SystematicUncertainties/SystematicUncertainties_MDA.csv")));
+
+            SampleData_Systematic = DataFrame(Name = [], Age = [], SystematicUncertainty = [])
+            RBCT_Systematic = readdlm(joinpath(filelocation,"SystematicUncertainties/SystematicUncertainties_RBCT.csv"),',',skipstart=1); push!(SampleData_Systematic, ["RBCT", RBCT_Systematic[:,5], RBCT_Systematic[:,6]]);
+            RBCU_Systematic = readdlm(joinpath(filelocation,"SystematicUncertainties/SystematicUncertainties_RBCU.csv"),',',skipstart=1); push!(SampleData_Systematic, ["RBCU", RBCU_Systematic[:,5], RBCU_Systematic[:,6]]);
+            RBCV_Systematic = readdlm(joinpath(filelocation,"SystematicUncertainties/SystematicUncertainties_RBCV.csv"),',',skipstart=1); push!(SampleData_Systematic, ["RBCV", RBCV_Systematic[:,5], RBCV_Systematic[:,6]]);
+            RBCZ_Systematic = readdlm(joinpath(filelocation,"SystematicUncertainties/SystematicUncertainties_RBCZ.csv"),',',skipstart=1); push!(SampleData_Systematic, ["RBCZ", RBCZ_Systematic[:,5], RBCZ_Systematic[:,6]]);
+            RBCY_Systematic = readdlm(joinpath(filelocation,"SystematicUncertainties/SystematicUncertainties_RBCY.csv"),',',skipstart=1); push!(SampleData_Systematic, ["RBCY", RBCY_Systematic[:,5], RBCY_Systematic[:,6]]);
+            RBCW_Systematic = readdlm(joinpath(filelocation,"SystematicUncertainties/SystematicUncertainties_RBCW.csv"),',',skipstart=1); push!(SampleData_Systematic, ["RBCW", RBCW_Systematic[:,5], RBCW_Systematic[:,6]]);
+            RBFS_Systematic = readdlm(joinpath(filelocation,"SystematicUncertainties/SystematicUncertainties_RBFS.csv"),',',skipstart=1); push!(SampleData_Systematic, ["RBFS", RBFS_Systematic[:,5], RBFS_Systematic[:,6]]);
+            RBFT_Systematic = readdlm(joinpath(filelocation,"SystematicUncertainties/SystematicUncertainties_RBFT.csv"),',',skipstart=1); push!(SampleData_Systematic, ["RBFT", RBFT_Systematic[:,5], RBFT_Systematic[:,6]]);
+            RBEC_Systematic = readdlm(joinpath(filelocation,"SystematicUncertainties/SystematicUncertainties_RBEC.csv"),',',skipstart=1); push!(SampleData_Systematic, ["RBEC", RBEC_Systematic[:,5], RBEC_Systematic[:,6]]);
+            RBFR_Systematic = readdlm(joinpath(filelocation,"SystematicUncertainties/SystematicUncertainties_RBFR.csv"),',',skipstart=1); push!(SampleData_Systematic, ["RBFR", RBFR_Systematic[:,5], RBFR_Systematic[:,6]]);
+            RBEB_Systematic = readdlm(joinpath(filelocation,"SystematicUncertainties/SystematicUncertainties_RBEB.csv"),',',skipstart=1); push!(SampleData_Systematic, ["RBEB", RBEB_Systematic[:,5], RBEB_Systematic[:,6]]);
+            RBFQ_Systematic = readdlm(joinpath(filelocation,"SystematicUncertainties/SystematicUncertainties_RBFQ.csv"),',',skipstart=1); push!(SampleData_Systematic, ["RBFQ", RBFQ_Systematic[:,5], RBFQ_Systematic[:,6]]);
+
         
         #Desired samples (Match to those put into Bayesian modeling)
             samples = ("RBCT", "RBCU", "RBCV", "RBCZ", "RBCY", "RBCW", "RBFS", "RBFT", "RBEC", "RBFR", "RBEB", "RBFQ");
@@ -155,11 +169,11 @@ using CSV, DataFrames
             startpoint = 0
             endpoint = 0
 
-            for i = 1:length(SampleData.Name)
+            for i = 1:length(SampleData_Systematic.Name)
 
-                sample_name = SampleData.Name[i]
-                ages = SampleData.Age[i]
-                uncert = SampleData.Uncertainty[i]
+                sample_name = SampleData_Systematic.Name[i]
+                ages = SampleData_Systematic.Age[i]
+                uncert = SampleData_Systematic.SystematicUncertainty[i]
                     
                 #Sort the data by age for the rank order plot
                     sorted = sortperm(ages, rev=true)
@@ -183,7 +197,7 @@ using CSV, DataFrames
                     
                     else #RBEC and RBFQ are maximum depositional age of the youngest zircon rather than Bayesian age like others, so don't plot the Bayesian age data. Both have only two Deccan-age zircons that are not overlapping, so treated as max depostional age instead of Bayesian eruption age
                         plot!(h2,startpoint:endpoint,ages,yerror=uncert,seriestype=:scatter, color=colors[i], markerstrokecolor=colors[i], label="$sample_name", xlims=(0,endpoint+1))
-                        plot!(h2, [startpoint, endpoint], MDA_Systematic.Age_Z[i].*[1,1], ribbon=[MDA_Systematic.Age_Z_minus[i]], seriestype=:line, color=colors[i], markerstrokecolor=colors[i], label="", linealpha=1, fillalpha=0.3, series_annotations=[text("$sample_name",9,:bottom, color=colors[i]), ""])
+                        plot!(h2, [startpoint, endpoint], MDA_Systematic.Age_Z[i].*[1,1], ribbon=[MDA_Systematic.Age_Z_2sigma_uncert[i]], seriestype=:line, color=colors[i], markerstrokecolor=colors[i], label="", linealpha=1, fillalpha=0.3, series_annotations=[text("$sample_name",9,:bottom, color=colors[i]), ""])
                     end
             end
         
@@ -210,7 +224,7 @@ using CSV, DataFrames
             vline!(h2, [startpoint - 1], linestyle=:dash, color=:gray) #Line to separate the Ar-Ar and U-Pb data 
             endpoint = x2 + number_of_samples + 1 
             plot!(h2,startpoint:endpoint,ages_Shrivastava,yerror=uncert_Shrivastava,seriestype=:scatter,color=:tan4, markerstrokecolor=:tan4, markershape=:rect, label="", xlims=(0,endpoint+2))
-            plot!(h2, [startpoint, endpoint], [Shrivastava_Ar_WeightedMean_Systematic.Plateau[1], Shrivastava_Ar_WeightedMean_Systematic.Plateau[1]], ribbon=(Shrivastava_Ar_WeightedMean_Systematic.Plateau1sigma[1] * 2), seriestype=:line, color=:tan4, markerstrokecolor=:tan4, label="", linealpha=0.7, fillalpha=0.3)
+            plot!(h2, [startpoint, endpoint], [Shrivastava_Ar_WeightedMean_Systematic.Age[1], Shrivastava_Ar_WeightedMean_Systematic.Age[1]], ribbon=(Shrivastava_Ar_WeightedMean_Systematic.Sigma[1] * 2), seriestype=:line, color=:tan4, markerstrokecolor=:tan4, label="", linealpha=0.7, fillalpha=0.3)
             
         #Label the two datasets
             plot!(h2, [startpoint, endpoint], [67, 67], linealpha=0, label="", series_annotations=[text("U-Pb data \n This study",9,:bottom), ""])
@@ -220,5 +234,139 @@ using CSV, DataFrames
         display(h2)
         savefig(h2, "Rank_order_plot_eastern_redboles_with_ArArdata.pdf")
         savefig(h2, "Rank_order_plot_eastern_redboles_with_ArArdata.svg")
+
+## --- Comparison of U-Pb and Ar-Ar ages using different Ar-Ar calibrations (standard ages and decay constants)
+   #Set up plot
+        h3 = plot(ylabel="Age (Ma)", xlabel="", xaxis=false, xticks=false, xlims = (0, 28), yflip=true, ygridalpha=0.3, ylims=(62.3, 67.3), margin=5mm, ytickfontsize=9, legend=:topleft)
+
+        #Cretaceous-Paleogene boundary (Schoene et al. 2019 recalculation of Clyde et al. 2016 U-Pb date: 66.016±0.050/0.69/0.099 Ma (full systematic uncertainty used here))
+            plot!(h3, [0,100], [66.016, 66.016], ribbon=0.099, seriestype=:line, color=:firebrick2, markerstrokecolor=:firebrick2, label="", linealpha=1, fillalpha=0.3, series_annotations=["",text("KPB",9,:left, :firebrick2)])
+        
+        #Start point for rank order plots
+            x3 = 0;
+            
+    #U-Pb red bole ages, preferred interpretation from this study (with systematic uncertainties)
+        #Load systematic uncertainty datasets
+            BayesianAges_Systematic = DataFrame(CSV.File(joinpath(filelocation, "SystematicUncertainties/SystematicUncertainties_bootstrapped.csv"))); sort!(BayesianAges_Systematic, :Age_X, rev=true);
+            MDA_Systematic = DataFrame(CSV.File(joinpath(filelocation, "SystematicUncertainties/SystematicUncertainties_MDA.csv"))); sort!(MDA_Systematic, :Age_X, rev=true);
+        
+        #Label dataset 
+            plot!(h3, [x3], [66.8, 66.8], linealpha=0, label="", series_annotations=[text("U-Pb data \n Preferred interpretations \n This study",5,:top), ""])
+
+        #Rank order plot for the redboles (ages only, not individual zircon dates)
+            for i = 1:length(BayesianAges_Systematic.Sample)
+                sample_name = BayesianAges_Systematic.Sample[i]
+
+                if sample_name != "RBFQ" && sample_name != "RBEC"
+                    ages = BayesianAges_Systematic.Age_Z[i]
+                    plus_uncert = BayesianAges_Systematic.Age_Z_95plus[i]
+                    minus_uncert = BayesianAges_Systematic.Age_Z_95minus[i]
+                else #RBEC and RBFQ are maximum depositional age of the youngest zircon rather than Bayesian age like others, so use MDA age data and systematic uncertainties
+                    ages = MDA_Systematic.Age_Z[i]
+                    plus_uncert = MDA_Systematic.Age_Z_2sigma_uncert[i]
+                    minus_uncert = MDA_Systematic.Age_Z_2sigma_uncert[i]
+                end
+
+                #Plotting 
+                    if i == 1
+                        plot!(h3, [x3 + i], [ages], yerror=([minus_uncert], [plus_uncert]), color=ColorSchemes.YlGnBu[6], markerstrokecolor=ColorSchemes.YlGnBu[6], seriestype=:scatter, label="U-Pb ages, this study")
+                    else
+                        plot!(h3, [x3 + i], [ages], yerror=([minus_uncert], [plus_uncert]), color=ColorSchemes.YlGnBu[6], markerstrokecolor=ColorSchemes.YlGnBu[6], seriestype=:scatter, label="")
+                    end
+            end
+    
+            x3 += length(BayesianAges_Systematic.Sample)
+
+        #Divide from next dataset with vertical line 
+            vline!(h3, [x3 + 0.5], linestyle=:dash, color=:gray, label="")
+
+    #Ar-Ar ages with preferred Shrivastava et al. (2015) standard age (Kuiper et al. 2008 Fish Canyon sanidine) and decay constants (Min et al. 2000 recalibration of Beckinsale and Gale 1969) (with systematic uncertainties)
+        #Load dataset
+            Shrivastava_Ar = DataFrame(CSV.File(joinpath(@__DIR__, "Shrivastava_ArAr_Data/Shrivastava_ArAr_SystematicUncertainties.csv")));
+
+        # Plateau ages (Ma) and 2 sigma systematic uncertainties for plagioclase separates in Shrivastava et al. 2015
+            samples_Shrivastava = Shrivastava_Ar.Sample
+            ages_Shrivastava = Shrivastava_Ar.Plateau #Plateau ages (preferred ages from Shrivastava et al. 2015)
+            uncert_Shrivastava = Shrivastava_Ar.Plateau1sigma .* 2 #2 sigma for plateau ages (with systematic uncertainties) 
+
+        #Sort by age
+            t_Shrivastava = sortperm(ages_Shrivastava, rev=true)
+            ages_Shrivastava = ages_Shrivastava[t_Shrivastava];
+            uncert_Shrivastava = uncert_Shrivastava[t_Shrivastava];
+
+        #Weighted mean with systematic uncertainties
+            Shrivastava_Ar_WeightedMean_Systematic = DataFrame(CSV.File(joinpath(@__DIR__, "Shrivastava_ArAr_Data/Shrivastava_ArAr_WeightedMean_Systematic.csv")));
+
+        #Label dataset 
+            plot!(h3, [x3], [66.8, 66.8], linealpha=0, label="", series_annotations=[text("Ar-Ar data \n Kuiper et al. 2008 FCs \n Min et al. 2000 recalibration of \n Beckinsale and Gale 1969 decay constants",5,:top), ""])
+        
+        #Plot
+            plot!(h3, (x3 + 1):(length(ages_Shrivastava)+ x3), ages_Shrivastava, yerror=uncert_Shrivastava, seriestype=:scatter,color=:tan4, markerstrokecolor=:tan4, markershape=:rect, label="Ar-Ar ages, Shrivastava et al. 2015")
+            plot!(h3, [(x3 + 1), (length(ages_Shrivastava)+ x3)], [Shrivastava_Ar_WeightedMean_Systematic.Age[1], Shrivastava_Ar_WeightedMean_Systematic.Age[1]], ribbon=(Shrivastava_Ar_WeightedMean_Systematic.Sigma[1] * 2), seriestype=:line, color=:tan4, markerstrokecolor=:tan4, label="", linealpha=0.7, fillalpha=0.3)
+        
+            x3 += length(ages_Shrivastava)
+
+        #Divide from next dataset with vertical line 
+            vline!(h3, [x3 + 0.5], linestyle=:dash, color=:gray, label="")
+
+    #Ar-Ar ages with Renne et al. 2011 Fish Canyon sanidine standard age and decay constants (with systematic uncertainties)
+        #Load dataset
+            Shrivastava_Ar_Renne2011 = DataFrame(CSV.File(joinpath(@__DIR__, "Shrivastava_ArAr_Data/Shrivastava_ArAr_SystematicUncertainties_Renne2011.csv")));
+
+        # Plateau ages (Ma) and 2 sigma systematic uncertainties for plagioclase separates in Shrivastava et al. 2015
+            samples_Shrivastava_Renne2011 = Shrivastava_Ar_Renne2011.Sample
+            ages_Shrivastava_Renne2011 = Shrivastava_Ar_Renne2011.Plateau
+            uncert_Shrivastava_Renne2011 = Shrivastava_Ar_Renne2011.Plateau1sigma .* 2 #2 sigma for ages (with systematic uncertainties) 
+
+        #Sort by age
+            t_Shrivastava_Renne2011 = sortperm(ages_Shrivastava_Renne2011, rev=true)
+            ages_Shrivastava_Renne2011 = ages_Shrivastava_Renne2011[t_Shrivastava_Renne2011];
+            uncert_Shrivastava_Renne2011 = uncert_Shrivastava_Renne2011[t_Shrivastava_Renne2011];
+
+        #Weighted mean with systematic uncertainties
+            Shrivastava_Ar_Renne2011_WeightedMean_Systematic = DataFrame(CSV.File(joinpath(@__DIR__, "Shrivastava_ArAr_Data/Shrivastava_ArAr_WeightedMean_Systematic_Renne2011.csv")));
+
+        #Label dataset 
+            plot!(h3, [x3], [66.8, 66.8], linealpha=0, label="", series_annotations=[text("Ar-Ar data \n Renne et al. 2011 \n FCs and decay constants",5,:top), ""])
+        
+        #Plot
+            plot!(h3, (x3 + 1):(length(ages_Shrivastava_Renne2011)+ x3), ages_Shrivastava_Renne2011, yerror=uncert_Shrivastava_Renne2011, seriestype=:scatter,color=:tan4, markerstrokecolor=:tan4, markershape=:rect, label="")
+            plot!(h3, [(x3 + 1), (length(ages_Shrivastava_Renne2011)+ x3)], [Shrivastava_Ar_Renne2011_WeightedMean_Systematic.Age[1], Shrivastava_Ar_Renne2011_WeightedMean_Systematic.Age[1]], ribbon=(Shrivastava_Ar_Renne2011_WeightedMean_Systematic.Sigma[1] * 2), seriestype=:line, color=:tan4, markerstrokecolor=:tan4, label="", linealpha=0.7, fillalpha=0.3)
+        
+            x3 += length(ages_Shrivastava_Renne2011)
+
+        #Divide from next dataset with vertical line 
+            vline!(h3, [x3 + 0.5], linestyle=:dash, color=:gray, label="")
+
+    #Ar-Ar ages with Carter et al. 2025 Fish Canyon sanidine standard age and decay constants (with systematic uncertainties)
+        #Load dataset
+            Shrivastava_Ar_Carter2025 = DataFrame(CSV.File(joinpath(@__DIR__, "Shrivastava_ArAr_Data/Shrivastava_ArAr_SystematicUncertainties_Carter2025.csv")));
+
+        # Plateau ages (Ma) and 2 sigma systematic uncertainties for plagioclase separates in Shrivastava et al. 2015
+            samples_Shrivastava_Carter2025 = Shrivastava_Ar_Carter2025.Sample
+            ages_Shrivastava_Carter2025 = Shrivastava_Ar_Carter2025.Plateau
+            uncert_Shrivastava_Carter2025 = Shrivastava_Ar_Carter2025.Plateau1sigma .* 2 #2 sigma for ages (with systematic uncertainties) 
+
+        #Sort by age
+            t_Shrivastava_Carter2025 = sortperm(ages_Shrivastava_Carter2025, rev=true)
+            ages_Shrivastava_Carter2025 = ages_Shrivastava_Carter2025[t_Shrivastava_Carter2025];
+            uncert_Shrivastava_Carter2025 = uncert_Shrivastava_Carter2025[t_Shrivastava_Carter2025];
+
+        #Weighted mean with systematic uncertainties
+            Shrivastava_Ar_Carter2025_WeightedMean_Systematic = DataFrame(CSV.File(joinpath(@__DIR__, "Shrivastava_ArAr_Data/Shrivastava_ArAr_WeightedMean_Systematic_Carter2025.csv")));
+
+        #Label dataset 
+            plot!(h3, [x3], [66.8, 66.8], linealpha=0, label="", series_annotations=[text("Ar-Ar data \n Carter et al. 2025 \n FCs and decay constants",5,:top), ""])
+        
+        #Plot
+            plot!(h3, (x3 + 1):(length(ages_Shrivastava_Carter2025)+ x3), ages_Shrivastava_Carter2025, yerror=uncert_Shrivastava_Carter2025, seriestype=:scatter,color=:tan4, markerstrokecolor=:tan4, markershape=:rect, label="")
+            plot!(h3, [(x3 + 1), (length(ages_Shrivastava_Carter2025)+ x3)], [Shrivastava_Ar_Carter2025_WeightedMean_Systematic.Age[1], Shrivastava_Ar_Carter2025_WeightedMean_Systematic.Age[1]], ribbon=(Shrivastava_Ar_Carter2025_WeightedMean_Systematic.Sigma[1] * 2), seriestype=:line, color=:tan4, markerstrokecolor=:tan4, label="", linealpha=0.7, fillalpha=0.3)
+        
+            x3 += length(ages_Shrivastava_Carter2025)
+
+    #Save and display figure
+        display(h3)
+        savefig(h3, "Rank_order_plot_ArArcalibrationcomparison.pdf")
+        savefig(h3, "Rank_order_plot_ArArcalibrationcomparison.svg")
 
 ## --- End of file

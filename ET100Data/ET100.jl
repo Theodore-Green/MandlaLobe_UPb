@@ -17,13 +17,13 @@ analyses = UPbAnalysis.(eachcol(ET100_data)...,)
     plot!(h1, analyses, color=:darkblue, fillalpha=0.4, linecolor=:black, label="")
     concordiacurve!(h1) # Add concordia curve
     savefig(h1, "ET100_concordia.pdf")
-    display(hdl)
+    display(h1)
 
-    # Rank-order plot of 6/8 ages
+    # Rank-order plot of 206Pb/238U ages
     h2 = plot(framestyle=:box, legend=:topleft, title="ET100")
     rankorder!(h2[1], age68.(analyses), ylabel="²⁰⁶Pb/²³⁸U Age [Ma]", color=:darkblue, mscolor=:darkblue, margins=5mm)
-    hline!(h2, [100.2058], color=:black, ribbon=(0.0048), fillalpha=0.6, label="100.2058 ± 0.0048/0.025 Ma \n n = 39; MSWD = 2.8")
-    hline!(h2, [100.2058], color=:black, ribbon=(0.025), fillalpha=0.3, label="")
+    hline!(h2, [100.206], color=:black, ribbon=(0.005), fillalpha=0.6, label="100.206 ± 0.005/0.025 Ma \n n = 39; MSWD = 2.76")
+    hline!(h2, [100.206], color=:black, ribbon=(0.025), fillalpha=0.3, label="")
     savefig(h2, "ET100_rankorder.pdf")
     display(h2)
 
