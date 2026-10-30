@@ -19,7 +19,7 @@ analyses = UPbAnalysis.(eachcol(ET100_data)...,)
     savefig(h1, "ET100_concordia.pdf")
     display(h1)
 
-    # Rank-order plot of 206Pb/238U ages
+    # Rank-order plot of 6/8 ages
     h2 = plot(framestyle=:box, legend=:topleft, title="ET100")
     rankorder!(h2[1], age68.(analyses), ylabel="²⁰⁶Pb/²³⁸U Age [Ma]", color=:darkblue, mscolor=:darkblue, margins=5mm)
     hline!(h2, [100.206], color=:black, ribbon=(0.005), fillalpha=0.6, label="100.206 ± 0.005/0.025 Ma \n n = 39; MSWD = 2.76")
@@ -28,4 +28,3 @@ analyses = UPbAnalysis.(eachcol(ET100_data)...,)
     display(h2)
 
 ## --- End of file
-
