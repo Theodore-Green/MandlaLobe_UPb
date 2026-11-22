@@ -105,21 +105,21 @@ using QuadGK, Dierckx, DSP, LsqFit
 
             #Pdf distribution and total area under curve for chosen red bole sample. Total area should be ~1 because they're close to gaussian distributions
             if sample == "RBEC"
-                redbole_distribution = normpdf(RBEC[end,1], RBEC[end,2], duration)
-                totalarea_redbole = normcdf(RBEC[end,1], RBEC[end,2], duration[end]) - normcdf(RBEC[end,1], RBEC[end,2], duration[1])
+                redbole_distribution = normpdf(RBEC[end,1], RBEC[end,2]/2, duration)
+                totalarea_redbole = normcdf(RBEC[end,1], RBEC[end,2]/2, duration[end]) - normcdf(RBEC[end,1], RBEC[end,2]/2, duration[1])
             elseif sample == "RBFQ"
-                redbole_distribution = normpdf(RBFQ[end,1], RBFQ[end,2], duration)
-                totalarea_redbole = normcdf(RBFQ[end,1], RBFQ[end,2], duration[end]) - normcdf(RBFQ[end,1], RBFQ[end,2], duration[1])
+                redbole_distribution = normpdf(RBFQ[end,1], RBFQ[end,2]/2, duration)
+                totalarea_redbole = normcdf(RBFQ[end,1], RBFQ[end,2]/2, duration[end]) - normcdf(RBFQ[end,1], RBFQ[end,2]/2, duration[1])
             elseif contains("$interpretation", "bootstrapped")
                 redbole_distribution = bilinear_exponential(duration, Mandla_samples_distparameters[i,2:end])
                 dist_parameters = BilinearExponential(Mandla_samples_distparameters[i,2], Mandla_samples_distparameters[i,3], Mandla_samples_distparameters[i,4], Mandla_samples_distparameters[i,5], Mandla_samples_distparameters[i,6])
                 totalarea_redbole = cdf(dist_parameters, duration[end]) - cdf(dist_parameters, duration[1])
             elseif contains("$interpretation", "weightedmean")
-                redbole_distribution = normpdf(Mandla_samples_distparameters.WeightedMeanAge[i], Mandla_samples_distparameters.Uncertainty_2σ[i], duration)
-                totalarea_redbole = normcdf(Mandla_samples_distparameters.WeightedMeanAge[i], Mandla_samples_distparameters.Uncertainty_2σ[i], duration[end]) - normcdf(Mandla_samples_distparameters.WeightedMeanAge[i], Mandla_samples_distparameters.Uncertainty_2σ[i], duration[1])
+                redbole_distribution = normpdf(Mandla_samples_distparameters.WeightedMeanAge[i], Mandla_samples_distparameters.Uncertainty_2σ[i]/2, duration)
+                totalarea_redbole = normcdf(Mandla_samples_distparameters.WeightedMeanAge[i], Mandla_samples_distparameters.Uncertainty_2σ[i]/2, duration[end]) - normcdf(Mandla_samples_distparameters.WeightedMeanAge[i], Mandla_samples_distparameters.Uncertainty_2σ[i]/2, duration[1])
             elseif contains("$interpretation", "youngestzircon")
-                redbole_distribution = normpdf(Mandla_samples_distparameters[i,2], Mandla_samples_distparameters[i,3], duration)
-                totalarea_redbole = normcdf(Mandla_samples_distparameters[i,2], Mandla_samples_distparameters[i,3], duration[end]) - normcdf(Mandla_samples_distparameters[i,2], Mandla_samples_distparameters[i,3], duration[1])
+                redbole_distribution = normpdf(Mandla_samples_distparameters[i,2], Mandla_samples_distparameters[i,3]/2, duration)
+                totalarea_redbole = normcdf(Mandla_samples_distparameters[i,2], Mandla_samples_distparameters[i,3]/2, duration[end]) - normcdf(Mandla_samples_distparameters[i,2], Mandla_samples_distparameters[i,3]/2, duration[1])
             end
 
             #Distributions of the overlap areas. Minimum values at each point in the overlap area, allows for shading in the overlap area on plots and calculating curves to define that area
@@ -167,21 +167,21 @@ using QuadGK, Dierckx, DSP, LsqFit
 
             #Pdf distribution and total area under curve for chosen red bole sample. Total area should be ~1 because they're close to gaussian distributions
             if sample == "RBEC"
-                redbole_distribution = normpdf(RBEC[end,1], RBEC[end,2], duration)
-                totalarea_redbole = normcdf(RBEC[end,1], RBEC[end,2], duration[end]) - normcdf(RBEC[end,1], RBEC[end,2], duration[1])
+                redbole_distribution = normpdf(RBEC[end,1], RBEC[end,2]/2, duration)
+                totalarea_redbole = normcdf(RBEC[end,1], RBEC[end,2]/2, duration[end]) - normcdf(RBEC[end,1], RBEC[end,2]/2, duration[1])
             elseif sample == "RBFQ"
-                redbole_distribution = normpdf(RBFQ[end,1], RBFQ[end,2], duration)
-                totalarea_redbole = normcdf(RBFQ[end,1], RBFQ[end,2], duration[end]) - normcdf(RBFQ[end,1], RBFQ[end,2], duration[1])
+                redbole_distribution = normpdf(RBFQ[end,1], RBFQ[end,2]/2, duration)
+                totalarea_redbole = normcdf(RBFQ[end,1], RBFQ[end,2]/2, duration[end]) - normcdf(RBFQ[end,1], RBFQ[end,2]/2, duration[1])
             elseif contains("$interpretation", "bootstrapped")
                 redbole_distribution = bilinear_exponential(duration, Mandla_samples_distparameters[i,2:end])
                 dist_parameters = BilinearExponential(Mandla_samples_distparameters[i,2], Mandla_samples_distparameters[i,3], Mandla_samples_distparameters[i,4], Mandla_samples_distparameters[i,5], Mandla_samples_distparameters[i,6])
                 totalarea_redbole = cdf(dist_parameters, duration[end]) - cdf(dist_parameters, duration[1])
             elseif contains("$interpretation", "weightedmean")
-                redbole_distribution = normpdf(Mandla_samples_distparameters.WeightedMeanAge[i], Mandla_samples_distparameters.Uncertainty_2σ[i], duration)
-                totalarea_redbole = normcdf(Mandla_samples_distparameters.WeightedMeanAge[i], Mandla_samples_distparameters.Uncertainty_2σ[i], duration[end]) - normcdf(Mandla_samples_distparameters.WeightedMeanAge[i], Mandla_samples_distparameters.Uncertainty_2σ[i], duration[1])
+                redbole_distribution = normpdf(Mandla_samples_distparameters.WeightedMeanAge[i], Mandla_samples_distparameters.Uncertainty_2σ[i]/2, duration)
+                totalarea_redbole = normcdf(Mandla_samples_distparameters.WeightedMeanAge[i], Mandla_samples_distparameters.Uncertainty_2σ[i]/2, duration[end]) - normcdf(Mandla_samples_distparameters.WeightedMeanAge[i], Mandla_samples_distparameters.Uncertainty_2σ[i]/2, duration[1])
             elseif contains("$interpretation", "youngestzircon")
-                redbole_distribution = normpdf(Mandla_samples_distparameters[i,2], Mandla_samples_distparameters[i,3], duration)
-                totalarea_redbole = normcdf(Mandla_samples_distparameters[i,2], Mandla_samples_distparameters[i,3], duration[end]) - normcdf(Mandla_samples_distparameters[i,2], Mandla_samples_distparameters[i,3], duration[1])
+                redbole_distribution = normpdf(Mandla_samples_distparameters[i,2], Mandla_samples_distparameters[i,3]/2, duration)
+                totalarea_redbole = normcdf(Mandla_samples_distparameters[i,2], Mandla_samples_distparameters[i,3]/2, duration[end]) - normcdf(Mandla_samples_distparameters[i,2], Mandla_samples_distparameters[i,3]/2, duration[1])
             end
 
             #Distributions of the overlap areas. Minimum values at each point in the overlap area, allows for shading in the overlap area on plots and calculating curves to define that area
